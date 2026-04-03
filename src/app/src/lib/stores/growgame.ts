@@ -296,7 +296,15 @@ function createGameStore() {
         if (!pack || s.buds < pack.cost_buds) return s;
 
         const seeds: string[] = [];
-        for (let i = 0; i < pack.seed_count; i++) {
+        // Garantierter Seed: Rarity aus Pack-Definition
+        if (pack.guaranteed_rarity) {
+          const guaranteedPool = STRAIN_DEFS.filter(s => s.rarity === pack.guaranteed_rarity);
+          if (guaranteedPool.length > 0) {
+            seeds.push(guaranteedPool[Math.floor(Math.random() * guaranteedPool.length)].id);
+          }
+        }
+        // Rest: nur vom Breeder des Packs
+        while (seeds.length < pack.seed_count) {
           seeds.push(rollStrainFromPack(pack));
         }
 
@@ -636,22 +644,32 @@ export const activeGrows = derived(gameStore, $s => $s.grows);
 export const totalBuds = derived(gameStore, $s => $s.buds);
 export const totalWax = derived(gameStore, $s => $s.wax);
 
-/** Grow-Fortschritt als Prozent (0-100) */
-export function getGrowProgress(grow: ActiveGrow): number {
+/** Grow-Fortschritt als Prozent (0-100). Mit spaces/equipment wird Speed-Mult beruecksichtigt. */
+export function getGrowProgress(grow: ActiveGrow, spaces?: GrowSpace[], equipment?: OwnedEquip[]): number {
   const strain = getStrain(grow.strain_id);
   if (!strain) return 0;
+  let speedMult = 1;
+  if (spaces && equipment) {
+    const space = spaces.find(sp => sp.id === grow.space_id);
+    if (space) speedMult = spaceSpeedMult(space, equipment);
+  }
   const phases = getPhasesForType(strain.type);
-  const totalMs = phases.reduce((s, p) => s + p.hours * 3600000, 0);
+  const totalMs = phases.reduce((s, p) => s + (p.hours / speedMult) * 3600000, 0);
   const elapsed = Date.now() - grow.started_at;
   return Math.min(100, Math.round((elapsed / totalMs) * 100));
 }
 
-/** Verbleibende Zeit eines Grows als lesbarer String */
-export function getGrowTimeLeft(grow: ActiveGrow): string {
+/** Verbleibende Zeit eines Grows als lesbarer String. Mit spaces/equipment wird Speed-Mult beruecksichtigt. */
+export function getGrowTimeLeft(grow: ActiveGrow, spaces?: GrowSpace[], equipment?: OwnedEquip[]): string {
   const strain = getStrain(grow.strain_id);
   if (!strain) return '?';
+  let speedMult = 1;
+  if (spaces && equipment) {
+    const space = spaces.find(sp => sp.id === grow.space_id);
+    if (space) speedMult = spaceSpeedMult(space, equipment);
+  }
   const phases = getPhasesForType(strain.type);
-  const totalMs = phases.reduce((s, p) => s + p.hours * 3600000, 0);
+  const totalMs = phases.reduce((s, p) => s + (p.hours / speedMult) * 3600000, 0);
   const elapsed = Date.now() - grow.started_at;
   const remaining = Math.max(0, totalMs - elapsed);
   const hours = Math.floor(remaining / 3600000);

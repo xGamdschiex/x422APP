@@ -17,15 +17,17 @@
   }
 
   onMount(async () => {
+    // Seeds VOR Migration erfassen (migrateToV2 setzt seeds auf 0)
+    const oldSeeds = $zwergeStore.seeds;
     // V2 Migration + Starter Pack
     zwergeStore.migrateToV2();
     const zState = $zwergeStore;
     if (!zState.v2_migrated || zState.owned.length === 0) {
       zwergeStore.grantStarterPack();
     }
-    // Alte Seeds → Buds konvertieren
-    if (zState.seeds > 0) {
-      gameStore.migrateFromOldSeeds(zState.seeds);
+    // Alte Seeds → Buds konvertieren (einmalig, da migrateToV2 seeds nullt)
+    if (oldSeeds > 0) {
+      gameStore.migrateFromOldSeeds(oldSeeds);
     }
     // Grow-Ticks ausfuehren (Offline-Progression)
     gameStore.tick();

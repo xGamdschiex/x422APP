@@ -133,11 +133,9 @@ export const SEED_PACK_DEFS: SeedPackDef[] = [
   { id: 'pack-squareone',  label: 'Square One Genetics',  breeder: 'Square One', cost_buds: 800,  seed_count: 2, guaranteed_rarity: 'legendary', rarity: 'legendary' },
 ];
 
-/** Zufaelligen Strain aus Seedpack rollen */
+/** Zufaelligen Strain aus Seedpack rollen (nur vom Breeder des Packs) */
 export function rollStrainFromPack(pack: SeedPackDef): string {
-  const pool = pack.guaranteed_rarity
-    ? STRAIN_DEFS.filter(s => s.breeder === pack.breeder || s.rarity === pack.guaranteed_rarity)
-    : STRAIN_DEFS.filter(s => s.breeder === pack.breeder);
+  const pool = STRAIN_DEFS.filter(s => s.breeder === pack.breeder);
   if (pool.length === 0) return STRAIN_DEFS[0].id;
   return pool[Math.floor(Math.random() * pool.length)].id;
 }

@@ -493,8 +493,9 @@ function createZwergeStore() {
       return state.last_daily_claim !== today();
     },
 
-    /** Pack öffnen → gibt Array von gewonnenen Zwerg-IDs zurück */
-    openPack(tier: PackTier): number[] {
+    /** Pack öffnen → gibt Array von gewonnenen Zwerg-IDs zurück.
+     *  paidExternally=true wenn Kosten bereits extern (Buds) bezahlt wurden. */
+    openPack(tier: PackTier, paidExternally: boolean = false): number[] {
       let result: number[] = [];
 
       update(s => {
@@ -516,7 +517,7 @@ function createZwergeStore() {
 
         if (tier === 'daily') {
           if (s.last_daily_claim === today()) return s;
-        } else if (s.seeds < cost) {
+        } else if (!paidExternally && s.seeds < cost) {
           return s;
         }
 
@@ -569,7 +570,7 @@ function createZwergeStore() {
 
         const next: GamificationState = {
           ...s,
-          seeds: tier === 'daily' ? s.seeds + seedsBack : s.seeds - cost + seedsBack,
+          seeds: tier === 'daily' ? s.seeds + seedsBack : paidExternally ? s.seeds + seedsBack : s.seeds - cost + seedsBack,
           owned: newOwned,
           total_packs_opened: s.total_packs_opened + 1,
           last_pack_result: cards,
@@ -715,7 +716,7 @@ function createZwergeStore() {
           }
           toastStore.show(0, 'Update-Bonus: 5 Karten erhalten!');
         }
-        return { ...s, owned: newOwned, v2_migrated: true };
+        return { ...s, owned: newOwned, v2_migrated: true, seeds: 0 };
       });
     },
 

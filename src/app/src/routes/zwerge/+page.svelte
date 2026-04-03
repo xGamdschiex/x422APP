@@ -43,13 +43,11 @@
 
   function openPack(tier: PackTier) {
     if (tier !== 'daily') {
-      const pack = PACK_DEFS.find(p => p.tier === tier);
-      if (!pack || game.buds < pack.cost) return;
-      gameStore.addBuds(-pack.cost);
-      // Seeds auf Kosten setzen damit openPack intern funktioniert
-      zwergeStore.earnSeeds(pack.cost, []);
+      const effectiveCost = zwergeStore.getEffectiveCost(state, tier);
+      if (game.buds < effectiveCost) return;
+      gameStore.addBuds(-effectiveCost);
     }
-    const result = zwergeStore.openPack(tier);
+    const result = zwergeStore.openPack(tier, tier !== 'daily');
     if (result.length === 0) return;
     packResult = result;
     packOpening = true;

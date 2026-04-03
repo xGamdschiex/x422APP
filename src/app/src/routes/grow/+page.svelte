@@ -202,8 +202,8 @@
     <!-- Aktiver Grow -->
     {#if activeGrow}
       {@const strain = getStrain(activeGrow.strain_id)}
-      {@const progress = getGrowProgress(activeGrow)}
-      {@const timeLeft = getGrowTimeLeft(activeGrow)}
+      {@const progress = getGrowProgress(activeGrow, game.spaces, game.equipment)}
+      {@const timeLeft = getGrowTimeLeft(activeGrow, game.spaces, game.equipment)}
       <div class="card border-grow-primary/40">
         <div class="flex items-center justify-between mb-2">
           <div>

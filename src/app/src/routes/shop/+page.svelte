@@ -55,22 +55,24 @@
     return game.buds >= pack.cost;
   }
 
-  // Zwerg-Packs kosten jetzt Buds statt Seeds
-  // Die openPack-Logik im zwergeStore nutzt noch seeds intern,
-  // wir prüfen hier gegen buds und ziehen buds ab
+  // Zwerg-Packs kosten Buds — openPack mit paidExternally=true
   function openZwergPackWithBuds(tier: PackTier) {
     if (tier === 'daily') {
       zwergeStore.openPack(tier);
       return;
     }
-    const pack = PACK_DEFS.find(p => p.tier === tier);
-    if (!pack || game.buds < pack.cost) return;
-    // Buds abziehen
-    gameStore.addBuds(-pack.cost);
-    // Seeds temporaer setzen damit openPack funktioniert
-    // Workaround: wir geben dem zwergeStore genug seeds
-    zwergeStore.earnSeeds(pack.cost, []);
-    zwergeStore.openPack(tier);
+    const effectiveCost = zwergeStore.getEffectiveCost(zwerg, tier);
+    if (game.buds < effectiveCost) return;
+    gameStore.addBuds(-effectiveCost);
+    zwergeStore.openPack(tier, true);
+  }
+
+  // Calc-Packs kosten Log-Tokens
+  function openCalcPack(tier: import('$lib/stores/zwerge').CalcPackTier) {
+    const pack = CALC_PACK_DEFS.find(p => p.tier === tier);
+    if (!pack || game.log_tokens < pack.cost_tokens) return;
+    gameStore.addLogTokens(-pack.cost_tokens);
+    zwergeStore.openPack('naehrstoff', true); // nutzt naehrstoff-Pack Logik
   }
 </script>
 
@@ -289,7 +291,8 @@
       <p class="text-[10px] text-purple-400 font-bold">Calc-Packs (Log-Tokens)</p>
       {#each CALC_PACK_DEFS as pack}
         {@const affordable = game.log_tokens >= pack.cost_tokens}
-        <button disabled={!affordable}
+        <button on:click={() => openCalcPack(pack.tier)}
+                disabled={!affordable}
                 class="w-full card text-left transition-all active:scale-95
                        {affordable ? 'border-purple-400/40' : 'opacity-40'}">
           <p class="text-xs font-bold">{pack.label}</p>

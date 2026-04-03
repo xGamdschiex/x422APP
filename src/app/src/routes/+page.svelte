@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { userStore } from '$lib/stores/user';
   import { calcStore } from '$lib/stores/calc';
   import { onlineStore, queueCountStore } from '$lib/stores/sync';
@@ -17,10 +16,7 @@
   $: game = $gameStore;
   $: canDaily = $dailyAvailable;
 
-  onMount(() => {
-    zwergeStore.checkDailyLogin();
-    gameStore.tick();
-  });
+  // checkDailyLogin + tick laufen bereits im Layout — hier nicht nochmal
 
   $: calc = $calcStore;
   $: feedline = getFeedLine(prefs.feedline);
@@ -76,8 +72,8 @@
       <div class="space-y-2">
         {#each game.grows as grow}
           {@const strain = getStrain(grow.strain_id)}
-          {@const prog = getGrowProgress(grow)}
-          {@const timeLeft = getGrowTimeLeft(grow)}
+          {@const prog = getGrowProgress(grow, game.spaces, game.equipment)}
+          {@const timeLeft = getGrowTimeLeft(grow, game.spaces, game.equipment)}
           {@const space = game.spaces.find(sp => sp.id === grow.space_id)}
           <div class="p-2 rounded-lg bg-grow-dark/50 border border-grow-border/20">
             <div class="flex items-center justify-between mb-1">

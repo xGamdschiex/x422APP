@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --grow-dark: #0D1B0E;
+  --grow-surface: #1A2E1C;
+  --grow-primary: #4CAF50;
+  --grow-glass: rgba(26, 46, 28, 0.65);
+  --grow-glass-border: rgba(76, 175, 80, 0.15);
+}
+
+html {
+  background-color: #0D1B0E;
+  color: #E8F5E9;
+}
+
+body {
+  font-family: 'JetBrains Mono', monospace;
+  min-height: 100dvh;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Pixel-art rendering */
+.pixel-art {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Status badges */
+.badge-ok {
+  @apply bg-grow-primary/20 text-grow-primary px-2.5 py-0.5 rounded-full text-xs font-bold;
+}
+.badge-warn {
+  @apply bg-grow-warn/20 text-grow-warn px-2.5 py-0.5 rounded-full text-xs font-bold;
+}
+.badge-danger {
+  @apply bg-grow-danger/20 text-grow-danger px-2.5 py-0.5 rounded-full text-xs font-bold;
+}
+
+/* Card style — Legacy (andere Seiten nutzen .card weiterhin) */
+.card {
+  @apply bg-grow-surface rounded-xl p-4 border border-grow-primary/20;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+/* Glassmorphism Card — neues Design */
+.card-glass {
+  background: var(--grow-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--grow-glass-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+.card-glass:hover {
+  border-color: rgba(76, 175, 80, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Input style */
+input[type="number"], input[type="text"], select {
+  @apply bg-grow-dark border border-grow-primary/30 rounded-lg px-3 py-2 text-grow-text
+         focus:border-grow-primary focus:outline-none focus:ring-1 focus:ring-grow-primary/50
+         w-full;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Bottom nav safe area */
+.pb-nav {
+  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Smooth page transitions */
+.space-y-3 > *, .space-y-4 > * {
+  animation: fade-up 0.3s ease-out both;
+}
+.space-y-3 > *:nth-child(1), .space-y-4 > *:nth-child(1) { animation-delay: 0ms; }
+.space-y-3 > *:nth-child(2), .space-y-4 > *:nth-child(2) { animation-delay: 50ms; }
+.space-y-3 > *:nth-child(3), .space-y-4 > *:nth-child(3) { animation-delay: 100ms; }
+.space-y-3 > *:nth-child(4), .space-y-4 > *:nth-child(4) { animation-delay: 150ms; }
+.space-y-3 > *:nth-child(5), .space-y-4 > *:nth-child(5) { animation-delay: 200ms; }
+.space-y-3 > *:nth-child(n+6), .space-y-4 > *:nth-child(n+6) { animation-delay: 250ms; }
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

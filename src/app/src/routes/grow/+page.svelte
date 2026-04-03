@@ -39,7 +39,7 @@
     const maxPlants = spaceDef?.max_plants ?? 1;
     const seedItem = game.seed_inventory.find(si => si.strain_id === plantStrainId);
     const maxFromSeeds = seedItem?.count ?? 0;
-    const count = Math.min(plantCount, maxPlants, maxFromSeeds);
+    const count = Math.min(parseInt(String(plantCount), 10) || 1, maxPlants, maxFromSeeds);
     if (count < 1) return;
     gameStore.startGrow(selectedSpaceId, plantStrainId, count);
     plantStrainId = '';

@@ -63,6 +63,8 @@ export interface GameState {
   total_wax_produced: number;
   /** Achievement: Licht kaputt gegangen */
   ach_light_broke: boolean;
+  /** Letzter Daily-Seed-Check (YYYY-MM-DD) */
+  last_daily_check: string;
 }
 
 // ─── DEFAULTS ───────────────────────────────────────────────────────────
@@ -86,6 +88,7 @@ const DEFAULTS: GameState = {
   total_buds_earned: 0,
   total_wax_produced: 0,
   ach_light_broke: false,
+  last_daily_check: '',
 };
 
 // ─── HELPERS ────────────────────────────────────────────────────────────
@@ -316,14 +319,16 @@ function createGameStore() {
       return result;
     },
 
-    /** Daily Login: manchmal 1 Seed (immer wenn 0 Seeds) */
+    /** Daily Login: 1x pro Tag — manchmal 1 Seed (immer wenn 0 Seeds) */
     dailySeedCheck() {
       doUpdate(s => {
+        const today = new Date().toISOString().slice(0, 10);
+        if (s.last_daily_check === today) return s; // bereits heute gelaufen
+
         const hasAnySeeds = s.seed_inventory.some(si => si.count > 0);
         const giveFreeSeed = !hasAnySeeds || Math.random() < 0.15;
-        if (!giveFreeSeed) return s;
+        if (!giveFreeSeed) return { ...s, last_daily_check: today };
 
-        // Immer schlechtester Strain (White Widow Auto)
         const inv = [...s.seed_inventory];
         const ww = inv.find(si => si.strain_id === 'ww-auto');
         if (ww) {
@@ -332,7 +337,7 @@ function createGameStore() {
           inv.push({ strain_id: 'ww-auto', count: 1 });
         }
         toastStore.show(0, '+1 White Widow Auto Seed');
-        return { ...s, seed_inventory: inv };
+        return { ...s, seed_inventory: inv, last_daily_check: today };
       });
     },
 

@@ -17,6 +17,15 @@
   }
 
   onMount(async () => {
+    // SW-Update erkennen und Seite neu laden
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data?.type === 'SW_UPDATED') {
+          window.location.reload();
+        }
+      });
+    }
+
     // Seeds VOR Migration erfassen (migrateToV2 setzt seeds auf 0)
     const oldSeeds = $zwergeStore.seeds;
     // V2 Migration + Starter Pack

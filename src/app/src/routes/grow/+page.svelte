@@ -7,12 +7,13 @@
   import { getStrain, PHASE_LABELS } from '$lib/data/strains';
   import type { GrowPhase } from '$lib/data/strains';
   import PixelZwerg from '$lib/components/PixelZwerg.svelte';
+  import { toastStore } from '$lib/stores/toast';
+  import { onMount } from 'svelte';
 
   $: game = $gameStore;
   $: zwerg = $zwergeStore;
 
   // Tick bei jedem Laden
-  import { onMount } from 'svelte';
   onMount(() => { gameStore.tick(); });
 
   // Interval fuer Live-Updates
@@ -23,10 +24,10 @@
   });
 
   // Ausgewaehlter Space
-  let selectedSpaceId: string = game.spaces[0]?.id ?? '';
-  $: selectedSpace = game.spaces.find(sp => sp.id === selectedSpaceId);
+  let selectedSpaceId: string = $gameStore.spaces[0]?.id ?? '';
+  $: selectedSpace = game?.spaces?.find(sp => sp.id === selectedSpaceId);
   $: spaceDef = selectedSpace ? getSpaceDef(selectedSpace.type) : null;
-  $: activeGrow = game.grows.find(g => g.space_id === selectedSpaceId);
+  $: activeGrow = game?.grows?.find(g => g.space_id === selectedSpaceId);
 
   // Grow starten
   let plantStrainId = '';
@@ -40,10 +41,18 @@
     const seedItem = game.seed_inventory.find(si => si.strain_id === plantStrainId);
     const maxFromSeeds = seedItem?.count ?? 0;
     const count = Math.min(parseInt(String(plantCount), 10) || 1, maxPlants, maxFromSeeds);
-    if (count < 1) return;
-    gameStore.startGrow(selectedSpaceId, plantStrainId, count);
-    plantStrainId = '';
-    plantCount = 1;
+    if (count < 1) {
+      toastStore.show(0, 'Keine Seeds verfügbar!');
+      return;
+    }
+    const ok = gameStore.startGrow(selectedSpaceId, plantStrainId, count);
+    if (ok) {
+      toastStore.show(0, `Grow gestartet! ${count}x Pflanzen`);
+      plantStrainId = '';
+      plantCount = 1;
+    } else {
+      toastStore.show(0, 'Grow konnte nicht gestartet werden');
+    }
   }
 
   // Zwerg-Zuweisung

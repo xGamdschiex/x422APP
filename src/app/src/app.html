@@ -12,34 +12,6 @@
   %sveltekit.head%
 </head>
 <body data-sveltekit-preload-data="hover">
-  <script>
-    // Force SW cleanup — läuft VOR allem anderen
-    (function() {
-      var SW_VERSION = 5;
-      var KEY = 'athena_sw_ver';
-      var stored = parseInt(localStorage.getItem(KEY) || '0', 10);
-      if (stored < SW_VERSION && 'serviceWorker' in navigator) {
-        localStorage.setItem(KEY, String(SW_VERSION));
-        // Alle alten SWs und Caches entfernen
-        navigator.serviceWorker.getRegistrations().then(function(regs) {
-          var promises = regs.map(function(r) { return r.unregister(); });
-          return Promise.all(promises);
-        }).then(function() {
-          return caches.keys();
-        }).then(function(names) {
-          return Promise.all(names.map(function(n) { return caches.delete(n); }));
-        }).then(function() {
-          // Neuen SW registrieren und Seite neu laden
-          navigator.serviceWorker.register('/sw.js').then(function() {
-            window.location.reload();
-          });
-        });
-      } else if (!stored && 'serviceWorker' in navigator) {
-        localStorage.setItem(KEY, String(SW_VERSION));
-        navigator.serviceWorker.register('/sw.js');
-      }
-    })();
-  </script>
   <div style="display: contents">%sveltekit.body%</div>
 </body>
 </html>

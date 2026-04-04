@@ -17,8 +17,9 @@
   }
 
   onMount(async () => {
-    // SW-Update erkennen und Seite neu laden
+    // SW registrieren und Updates erkennen
     if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
       navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data?.type === 'SW_UPDATED') {
           window.location.reload();

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'athena-grow-v4';
+const CACHE_NAME = 'athena-grow-v5';
 
 const PRECACHE_URLS = [
   '/',

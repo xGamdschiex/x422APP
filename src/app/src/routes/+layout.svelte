@@ -105,7 +105,7 @@
   </main>
 
   <!-- Bottom Navigation -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-grow-surface/95 backdrop-blur border-t border-grow-primary/20 safe-bottom">
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-grow-surface/95 backdrop-blur border-t border-grow-primary/20 safe-bottom">
     <div class="flex justify-around items-center h-16 max-w-lg mx-auto">
       {#each nav as item}
         <a

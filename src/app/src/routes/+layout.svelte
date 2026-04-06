@@ -17,6 +17,11 @@
   }
 
   onMount(async () => {
+    // Chunk-Loading-Fehler nach Deploy abfangen → Hard Reload
+    window.addEventListener('vite:preloadError', () => {
+      window.location.reload();
+    });
+
     // SW registrieren und Updates erkennen
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(() => {});

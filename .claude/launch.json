@@ -8,6 +8,14 @@
       "port": 5173,
       "cwd": "src/app",
       "autoPort": true
+    },
+    {
+      "name": "athena-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "--", "--host"],
+      "port": 4173,
+      "cwd": "src/app",
+      "autoPort": true
     }
   ]
 }

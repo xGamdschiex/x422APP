@@ -23,17 +23,20 @@
     return () => clearInterval(interval);
   });
 
-  // Ausgewaehlter Space
-  let selectedSpaceId: string = $gameStore.spaces[0]?.id ?? '';
-  $: selectedSpace = game?.spaces?.find(sp => sp.id === selectedSpaceId);
+  // Ausgewaehlter Space — defensiv gegen undefined Store
+  let selectedSpaceId: string = '';
+  $: if (game?.spaces?.length && !selectedSpaceId) {
+    selectedSpaceId = game.spaces[0].id;
+  }
+  $: selectedSpace = game?.spaces?.find((sp: GrowSpace) => sp.id === selectedSpaceId) ?? null;
   $: spaceDef = selectedSpace ? getSpaceDef(selectedSpace.type) : null;
-  $: activeGrow = game?.grows?.find(g => g.space_id === selectedSpaceId);
+  $: activeGrow = game?.grows?.find((g: ActiveGrow) => g.space_id === selectedSpaceId) ?? null;
 
   // Grow starten
   let plantStrainId = '';
   let plantCount = 1;
 
-  $: availableSeeds = game.seed_inventory.filter(si => si.count > 0);
+  $: availableSeeds = game?.seed_inventory?.filter((si: { strain_id: string; count: number }) => si.count > 0) ?? [];
 
   function startGrow() {
     if (!plantStrainId || !selectedSpaceId) return;
@@ -82,7 +85,7 @@
     gameStore.installEquip(selectedSpaceId, equipId);
   }
 
-  $: ownedEquipNotInstalled = game.equipment.filter(e => {
+  $: ownedEquipNotInstalled = (game?.equipment ?? []).filter((e: { equip_id: string; broken: boolean }) => {
     if (!selectedSpace) return false;
     return !selectedSpace.installed_equip.includes(e.equip_id);
   });

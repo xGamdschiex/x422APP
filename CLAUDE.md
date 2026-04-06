@@ -27,6 +27,8 @@ cd src/app && npm test
 ```
 
 - IMMER nach Änderungen Build prüfen
+- Bei UI-Änderungen: Preview MCP nutzen (preview_start → preview_screenshot → preview_console_logs)
+- Preview läuft auf `cd src/app && npm run dev` (Port 5173)
 
 ## Parallelisierung
 
@@ -39,3 +41,54 @@ cd src/app && npm test
 - Static Site (adapter-static), `vercel.json` vorhanden
 - Secrets in Vercel Env Variables, nie in Git
 - Stateless Functions, kein KV/Postgres (discontinued)
+
+## Codebase-Map (kein File-Read nötig)
+
+### Stores (`src/app/src/lib/stores/`)
+| File | Export | Zweck |
+|------|--------|-------|
+| `growgame.ts` | `gameStore`, `activeGrows`, `totalBuds`, `totalWax` | Kern-Spiellogik: Grows, Equipment, Extraction, Währungen |
+| `zwerge.ts` | `zwergeStore` | 54 Zwerge, Leveling, Rollen, XP |
+| `calc.ts` | `calcStore` | Dünger-Rechner State |
+| `auth.ts` | `authStore` | Google OAuth Session |
+| `sync.ts` | `syncStore` | Google Sheets Sync |
+| `toast.ts` | `toastStore` | UI-Notifications |
+| `user.ts` | `userStore` | User-Präferenzen |
+
+### Data (`src/app/src/lib/data/`)
+| File | Key-Exports | Inhalt |
+|------|-------------|--------|
+| `strains.ts` | `STRAIN_DEFS` (17), `SEED_PACK_DEFS` (6), `AUTO_PHASES`, `PHOTO_PHASES` | Strains: common/rare/epic/legendary, Auto(240h)/Photo(336h) |
+| `equipment.ts` | `EQUIP_DEFS` (14), `EXTRACTION_DEFS` (9), `SPACE_DEFS` (4) | Spaces: fensterbank→kleine_box→grosse_box→kleiner_raum |
+
+### Wichtige Types
+```ts
+// growgame.ts
+GameState { buds, wax, log_tokens, seed_inventory, spaces, equipment, owned_extractions, grows }
+ActiveGrow { space_id, strain_id, plant_count, phase: GrowPhase, live_extraction }
+GrowSpace { type: SpaceType, installed_equip[], assigned_dwarves[] }
+
+// strains.ts
+GrowPhase = 'keimung'|'veg'|'bluete'|'trocknung'|'curing'
+StrainType = 'auto'|'photo'
+Rarity = 'common'|'rare'|'epic'|'legendary'  // definiert in zwerge.ts
+
+// equipment.ts
+SpaceType = 'fensterbank'|'kleine_box'|'grosse_box'|'kleiner_raum'
+ZwergRole = 'general'|'vpd_manager'|'nutrient_manager'|'light_manager'|'quality_manager'|'pest_controller'
+EquipCategory = 'light'|'venti'|'abluft'|'entfeuchter'
+```
+
+### Routen → Store-Abhängigkeiten
+- `+page.svelte` — Dashboard: gameStore + zwergeStore
+- `grow/+page.svelte` — Grow-Sim: gameStore
+- `shop/+page.svelte` — Shop: gameStore (Seeds, Equipment, Extraction, Spaces)
+- `zwerge/+page.svelte` — Zwerge-Management: zwergeStore + gameStore
+- `calc/+page.svelte` — Dünger-Rechner: calcStore
+- `log/+page.svelte` — Log: calcStore + gameStore (log_tokens)
+
+### Währungs-Logik
+- `buds` = Hauptwährung (verdient durch Harvests + Calc-Logs)
+- `wax` = Premium (Buds → Wax via Extraction, 1g Wax = 100 Buds)
+- `log_tokens` = durch Calc-Log-Einträge verdient
+- localStorage key: `athena_growgame`

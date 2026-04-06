@@ -7,6 +7,7 @@
   import { getStrain, PHASE_LABELS } from '$lib/data/strains';
   import type { GrowPhase } from '$lib/data/strains';
   import PixelZwerg from '$lib/components/PixelZwerg.svelte';
+  import GrowRoom from '$lib/components/GrowRoom.svelte';
   import { toastStore } from '$lib/stores/toast';
   import { onMount } from 'svelte';
 
@@ -136,6 +137,38 @@
   {/if}
 
   {#if selectedSpace && spaceDef}
+    <!-- GrowRoom Grafik — passt sich dem Space-Typ an -->
+    <div class="card-glass p-0 overflow-hidden rounded-xl">
+      <GrowRoom
+        phase={activeGrow?.phase ?? 'veg'}
+        woche={1}
+        tag={1}
+        spaceType={selectedSpace.type}
+        zwerge={selectedSpace.assigned_dwarves.filter(d => d != null)} />
+      {#if activeGrow}
+        {@const progress = getGrowProgress(activeGrow, game.spaces, game.equipment)}
+        {@const timeLeft = getGrowTimeLeft(activeGrow, game.spaces, game.equipment)}
+        {@const strain = getStrain(activeGrow.strain_id)}
+        <div class="px-3 py-2 flex items-center justify-between border-t border-grow-border/10">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold">{strain?.name ?? '?'}</span>
+            <span class="text-[10px] font-bold {PHASE_COLORS[activeGrow.phase]}">
+              {PHASE_LABELS[activeGrow.phase]}
+            </span>
+          </div>
+          <span class="text-[10px] text-grow-muted">{progress}% — {timeLeft}</span>
+        </div>
+        <div class="w-full h-1.5 bg-grow-dark">
+          <div class="h-full bg-gradient-to-r from-grow-primary to-grow-accent transition-all duration-1000"
+               style="width: {progress}%"></div>
+        </div>
+      {:else}
+        <div class="px-3 py-2 text-center">
+          <span class="text-[10px] text-grow-muted">Kein aktiver Grow — starte einen unten</span>
+        </div>
+      {/if}
+    </div>
+
     <!-- Space Info -->
     <div class="card">
       <div class="flex items-center justify-between mb-2">
@@ -211,32 +244,16 @@
       </div>
     </div>
 
-    <!-- Aktiver Grow -->
+    <!-- Aktiver Grow Details -->
     {#if activeGrow}
       {@const strain = getStrain(activeGrow.strain_id)}
-      {@const progress = getGrowProgress(activeGrow, game.spaces, game.equipment)}
-      {@const timeLeft = getGrowTimeLeft(activeGrow, game.spaces, game.equipment)}
-      <div class="card border-grow-primary/40">
-        <div class="flex items-center justify-between mb-2">
-          <div>
-            <p class="text-xs font-bold">{strain?.name ?? '?'}</p>
-            <p class="text-[10px] text-grow-muted">{strain?.breeder} — {activeGrow.plant_count}x Pflanzen</p>
-          </div>
-          <span class="text-[10px] font-bold {PHASE_COLORS[activeGrow.phase]}">
-            {PHASE_LABELS[activeGrow.phase]}
-          </span>
+      <div class="card border-grow-primary/20">
+        <div class="flex items-center justify-between">
+          <p class="text-[10px] text-grow-muted">{strain?.breeder} — {activeGrow.plant_count}x Pflanzen</p>
+          {#if activeGrow.live_extraction}
+            <span class="text-[9px] text-purple-400">Live-Extraction aktiv</span>
+          {/if}
         </div>
-        <div class="w-full bg-grow-dark rounded-full h-2.5 overflow-hidden mb-1">
-          <div class="h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-grow-primary to-grow-accent"
-               style="width: {progress}%"></div>
-        </div>
-        <div class="flex justify-between text-[10px] text-grow-muted">
-          <span>{progress}%</span>
-          <span>{timeLeft} verbleibend</span>
-        </div>
-        {#if activeGrow.live_extraction}
-          <p class="text-[9px] text-purple-400 mt-1">Live-Extraction aktiv (kein Curing)</p>
-        {/if}
       </div>
 
     <!-- Neuen Grow starten -->

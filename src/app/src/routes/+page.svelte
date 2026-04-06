@@ -10,11 +10,20 @@
   import type { GrowPhase } from '$lib/data/strains';
   import { getSpaceDef } from '$lib/data/equipment';
   import GrowRoom from '$lib/components/GrowRoom.svelte';
+  import type { SpaceType } from '$lib/data/equipment';
 
   $: prefs = $userStore;
   $: gamification = $zwergeStore;
   $: game = $gameStore;
   $: canDaily = $dailyAvailable;
+
+  // Ersten aktiven Grow finden fuer GrowRoom-Darstellung
+  $: firstGrow = game.grows?.[0] ?? null;
+  $: firstGrowSpace = firstGrow ? game.spaces?.find(sp => sp.id === firstGrow.space_id) : null;
+  $: roomSpaceType = (firstGrowSpace?.type ?? game.spaces?.[0]?.type ?? 'fensterbank') as SpaceType;
+  $: roomPhase = firstGrow?.phase ?? prefs.phase ?? 'veg';
+  // Woche aus Grow ableiten (grob: phase_start_time basiert)
+  $: roomWoche = prefs.woche ?? 1;
 
   // checkDailyLogin + tick laufen bereits im Layout — hier nicht nochmal
 
@@ -52,8 +61,8 @@
 <div class="space-y-3">
   <!-- ===== GROW ROOM (Calc-Visualisierung) ===== -->
   <div class="card-glass p-0 overflow-hidden">
-    <GrowRoom phase={prefs.phase} woche={prefs.woche} tag={prefs.tag}
-             zwerge={roomZwerge} />
+    <GrowRoom phase={roomPhase} woche={roomWoche} tag={prefs.tag}
+             spaceType={roomSpaceType} zwerge={roomZwerge} />
     <div class="flex items-center justify-center gap-3 py-2">
       <span class="px-3 py-1 rounded-full text-[10px] font-pixel font-bold
                    bg-gradient-to-r {phaseGradient(prefs.phase)} text-white shadow-lg">

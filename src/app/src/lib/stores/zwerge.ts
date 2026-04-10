@@ -18,7 +18,7 @@ export type BuffTrigger =
   | 'medium_coco' | 'medium_hydro' | 'medium_erde' | 'has_ro'
   | 'bloom_phase' | 'veg_phase' | 'flush_phase' | 'bloom_w5plus'
   | 'feedline_change' | 'new_strain' | 'night_login'
-  | 'streak_7' | 'grow_complete' | 'offline_sync'
+  | 'streak_7' | 'grow_complete' | 'offline_sync' | 'extraction_run'
   | 'passive' | 'pack_open' | 'none';
 
 export type BuffMode = 'add' | 'multiply' | 'pack_cards' | 'pack_discount';
@@ -96,22 +96,22 @@ export interface GamificationState {
 export const ZWERG_DEFS: ZwergDef[] = [
   // ── COMMON (12) ──
   { id: 1,  name: 'Tropfi',      rolle: 'Giesser',            rarity: 'common', buff_trigger: 'log_save',       buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed pro Log' },
-  { id: 2,  name: 'Schluckbert', rolle: 'Reservoir-Wart',     rarity: 'common', buff_trigger: 'log_save',       buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed pro Log' },
+  { id: 2,  name: 'Keiml',       rolle: 'Keimlings-Hueter',   rarity: 'common', buff_trigger: 'phase_change',   buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed bei Phase-Wechsel' },
   { id: 3,  name: 'Kruemmel',    rolle: 'Substrat-Mischer',   rarity: 'common', buff_trigger: 'medium_coco',    buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed bei Coco' },
-  { id: 4,  name: 'Stiefel',     rolle: 'Topf-Traeger',       rarity: 'common', buff_trigger: 'mix_complete',   buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed pro Mix' },
+  { id: 4,  name: 'Ruehrer',     rolle: 'Misch-Geselle',      rarity: 'common', buff_trigger: 'mix_complete',   buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed pro Mix' },
   { id: 5,  name: 'Wuzzel',      rolle: 'Wurzel-Pfleger',     rarity: 'common', buff_trigger: 'daily_login',    buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed bei Login' },
-  { id: 6,  name: 'Pumpbert',    rolle: 'Pumpen-Techniker',   rarity: 'common', buff_trigger: 'offline_sync',   buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed bei Sync' },
+  { id: 6,  name: 'Wolki',       rolle: 'Sync-Waechter',      rarity: 'common', buff_trigger: 'offline_sync',   buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed bei Sync' },
   { id: 7,  name: 'Rohri',       rolle: 'Leitungs-Pruefer',   rarity: 'common', buff_trigger: 'has_ro',         buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed mit RO' },
   { id: 8,  name: 'Giesela',     rolle: 'Giess-Assistentin',  rarity: 'common', buff_trigger: 'streak_7',       buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed bei 7d Streak' },
   { id: 9,  name: 'Schippchen',  rolle: 'Erde-Schaufler',     rarity: 'common', buff_trigger: 'medium_erde',    buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed bei Erde' },
-  { id: 10, name: 'Tropfnase',   rolle: 'Bewaesserungs-Helfer', rarity: 'common', buff_trigger: 'log_save',    buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed pro Log' },
+  { id: 10, name: 'Pressbert',   rolle: 'Extrakt-Lehrling',     rarity: 'common', buff_trigger: 'extraction_run', buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed pro Extraktion' },
   { id: 11, name: 'Blubber',     rolle: 'Airstone-Wart',      rarity: 'common', buff_trigger: 'medium_hydro',   buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed bei Hydro' },
-  { id: 12, name: 'Nubbi',       rolle: 'Anfaenger-Zwerg',    rarity: 'common', buff_trigger: 'none',           buff_mode: 'add', buff_value: 0, buff_label: 'Maskottchen' },
+  { id: 12, name: 'Nachti',      rolle: 'Nacht-Eule',         rarity: 'common', buff_trigger: 'night_login',    buff_mode: 'add', buff_value: 1, buff_label: '+1 Seed bei Nacht-Login' },
   // ── RARE (9) ──
   { id: 13, name: 'Professor pH',  rolle: 'pH-Meister',       rarity: 'rare', buff_trigger: 'has_ph',          buff_mode: 'add', buff_value: 2, buff_label: '+2 Seeds mit pH-Wert' },
   { id: 14, name: 'EC-Elmar',      rolle: 'EC-Kontrolleur',   rarity: 'rare', buff_trigger: 'has_ec',          buff_mode: 'add', buff_value: 2, buff_label: '+2 Seeds mit EC-Wert' },
-  { id: 15, name: 'Doktor Kalk',   rolle: 'CalMag-Spezialist', rarity: 'rare', buff_trigger: 'log_save',       buff_mode: 'add', buff_value: 2, buff_label: '+2 Seeds pro Log' },
-  { id: 16, name: 'Lumen',         rolle: 'Licht-Waechter',   rarity: 'rare', buff_trigger: 'phase_change',    buff_mode: 'add', buff_value: 2, buff_label: '+2 Seeds bei Phase-Wechsel' },
+  { id: 15, name: 'Tintenbart',    rolle: 'Protokoll-Meister',  rarity: 'rare', buff_trigger: 'log_save',       buff_mode: 'add', buff_value: 2, buff_label: '+2 Seeds pro Log' },
+  { id: 16, name: 'Wandler',       rolle: 'Phasen-Dirigent',  rarity: 'rare', buff_trigger: 'phase_change',    buff_mode: 'add', buff_value: 2, buff_label: '+2 Seeds bei Phase-Wechsel' },
   { id: 17, name: 'Flora',         rolle: 'Bluete-Gaertnerin', rarity: 'rare', buff_trigger: 'bloom_phase',    buff_mode: 'add', buff_value: 2, buff_label: '+2 Seeds in Bloom' },
   { id: 18, name: 'Veggie',        rolle: 'Veg-Spezialist',   rarity: 'rare', buff_trigger: 'veg_phase',       buff_mode: 'add', buff_value: 2, buff_label: '+2 Seeds in Veg' },
   { id: 19, name: 'Mixer Max',     rolle: 'Mix-Meister',      rarity: 'rare', buff_trigger: 'mix_complete',    buff_mode: 'add', buff_value: 3, buff_label: '+3 Seeds pro Mix' },
@@ -165,6 +165,11 @@ export const ZWERG_DEFS: ZwergDef[] = [
   { id: 52, name: 'Neem-Norbert',      rolle: 'Bio-Schuetzer',         rarity: 'rare',      buff_trigger: 'passive',       buff_mode: 'multiply', buff_value: 1.04, buff_label: 'Ertrag +4%',    grow_role: 'pest_controller' },
   { id: 53, name: 'Raeuber-Rosa',      rolle: 'Marienkaefer-Reiterin', rarity: 'epic',      buff_trigger: 'passive',       buff_mode: 'multiply', buff_value: 1.08, buff_label: 'Ertrag +8%',    grow_role: 'pest_controller' },
   { id: 54, name: 'Bio-Baron Boris',   rolle: 'Bio-Festungs-Meister',  rarity: 'legendary', buff_trigger: 'passive',       buff_mode: 'multiply', buff_value: 1.15, buff_label: 'Ertrag +15%',   grow_role: 'pest_controller' },
+
+  // ── EXTRAKTIONS-ZWERGE (Sammelkarten, ab ID 55) ──
+  { id: 55, name: 'Rosin-Rudi',       rolle: 'Rosin-Spezialist',     rarity: 'rare',      buff_trigger: 'extraction_run', buff_mode: 'add',      buff_value: 2,    buff_label: '+2 Seeds pro Extraktion' },
+  { id: 56, name: 'Destillat-Dora',   rolle: 'Extrakt-Meisterin',    rarity: 'epic',      buff_trigger: 'extraction_run', buff_mode: 'add',      buff_value: 4,    buff_label: '+4 Seeds pro Extraktion' },
+  { id: 57, name: 'Terpen-Titan',     rolle: 'Herr der Essenzen',    rarity: 'legendary', buff_trigger: 'extraction_run', buff_mode: 'multiply', buff_value: 1.2,  buff_label: 'Extrakt-Seeds +20%' },
 ];
 
 // ─── PACK-DEFINITIONEN ──────────────────────────────────────────────────

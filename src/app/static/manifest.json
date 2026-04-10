@@ -1,0 +1,19 @@
+{
+  "name": "x422 feeding",
+  "short_name": "x422",
+  "description": "Multi-Line Feeding Calculator — Cannabis Grow Tracker",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#4CAF50",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/sprites/veg-w2-d4.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "utilities"]
+}

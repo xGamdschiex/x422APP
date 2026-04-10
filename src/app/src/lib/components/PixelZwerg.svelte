@@ -54,6 +54,32 @@
   $: animClass = activeAction
     ? `animate-${activeAction}`
     : animate ? 'animate-bob' : '';
+
+  // Accessoire-Typ ableiten
+  $: accessoryType = (() => {
+    if (!def) return 'none';
+    if (def.grow_role) {
+      const m: Record<string, string> = {
+        vpd_manager: 'thermometer', nutrient_manager: 'flask', light_manager: 'bulb',
+        quality_manager: 'magnifier', pest_controller: 'shield', general: 'trowel'
+      };
+      return m[def.grow_role] || 'none';
+    }
+    const t: Record<string, string> = {
+      log_save: 'notebook', has_notiz: 'notebook',
+      mix_complete: 'flask', has_ph: 'flask', has_ec: 'flask',
+      medium_coco: 'flask', medium_hydro: 'flask', medium_erde: 'flask',
+      has_ro: 'flask', feedline_change: 'flask',
+      bloom_phase: 'flower', veg_phase: 'leaf', flush_phase: 'leaf',
+      grow_complete: 'trophy', new_strain: 'seedbag', bloom_w5plus: 'crystal',
+      phase_change: 'hourglass',
+      daily_login: 'sun', streak_7: 'calendar', night_login: 'moon',
+      offline_sync: 'cloud',
+      extraction_run: 'press',
+      passive: 'star', pack_open: 'gift',
+    };
+    return t[def.buff_trigger] || 'none';
+  })();
 </script>
 
 <svg
@@ -73,6 +99,19 @@
       <!-- Hutkrempe -->
       <polygon points="16,10 32,10 30,12 18,12" fill={hatColor} />
       <polygon points="16,10 24,10 24,12 18,12" fill={hatShadow} opacity="0.3" />
+
+      <!-- Hut-Deko nach Rarity (sitzend) -->
+      {#if rarity === 'rare'}
+        <polygon points="28,4 30,1 29,7" fill="#e74c3c" opacity="0.8" />
+      {:else if rarity === 'epic'}
+        <rect x="19" y="8" width="10" height="1.5" fill="#2c3e50" opacity="0.5" />
+        <polygon points="23,7 25,7 25.5,9 24,10 22.5,9" fill="#e74c3c" />
+      {:else if rarity === 'legendary'}
+        <polygon points="20,4 22,1 24,3 26,1 28,4" fill="#F1C40F" />
+        <circle cx="22" cy="3.5" r="0.8" fill="#e74c3c" />
+        <circle cx="24" cy="2.5" r="0.8" fill="#2980B9" />
+        <circle cx="26" cy="3.5" r="0.8" fill="#27ae60" />
+      {/if}
 
       <!-- Kopf -->
       <polygon points="18,12 30,12 31,16 29,20 19,20 17,16" fill={SKIN} />
@@ -159,6 +198,19 @@
       <polygon points="15,10 33,10 31,12 17,12" fill={hatColor} />
       <!-- Highlight -->
       <polygon points="24,3 22,8 26,8" fill="#fff" opacity="0.1" />
+
+      <!-- Hut-Deko nach Rarity -->
+      {#if rarity === 'rare'}
+        <polygon points="29,4 31,1 30,7" fill="#e74c3c" opacity="0.8" />
+      {:else if rarity === 'epic'}
+        <rect x="18" y="8" width="12" height="1.5" fill="#2c3e50" opacity="0.5" />
+        <polygon points="23,7 25,7 25.5,9 24,10 22.5,9" fill="#e74c3c" />
+      {:else if rarity === 'legendary'}
+        <polygon points="20,4 22,1 24,3 26,1 28,4" fill="#F1C40F" />
+        <circle cx="22" cy="3.5" r="0.8" fill="#e74c3c" />
+        <circle cx="24" cy="2.5" r="0.8" fill="#2980B9" />
+        <circle cx="26" cy="3.5" r="0.8" fill="#27ae60" />
+      {/if}
 
       <!-- Kopf -->
       <polygon points="17,12 31,12 32,16 30,20 18,20 16,16" fill={SKIN} />
@@ -330,6 +382,10 @@
       <!-- Idle Arme -->
       <polygon points="10,26 14,25 15,28 11,28" fill={SKIN} />
       <polygon points="34,26 38,25 39,28 35,28" fill={SKIN} />
+      <!-- Idle Accessoire (Gemini PNG) -->
+      {#if accessoryType !== 'none'}
+        <image href="/icons/{accessoryType}.png" x="34" y="18" width="12" height="12" />
+      {/if}
     {/if}
   {/if}
 

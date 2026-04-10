@@ -14,14 +14,44 @@
   $: canDaily = $dailyAvailable;
   $: collected = $collectionCount;
 
-  // Filter
-  type FilterType = Rarity | 'all' | 'roles';
+  // Filter + Sortierung
+  type FilterType = Rarity | 'all' | 'roles' | 'owned';
+  type SortType = 'default' | 'name' | 'rarity' | 'level';
   let filter: FilterType = 'all';
-  $: filteredDefs = filter === 'all'
-    ? ZWERG_DEFS
-    : filter === 'roles'
-      ? ZWERG_DEFS.filter(z => z.grow_role)
-      : ZWERG_DEFS.filter(z => z.rarity === filter);
+  let sort: SortType = 'default';
+
+  const RARITY_ORDER: Record<Rarity, number> = { common: 0, rare: 1, epic: 2, legendary: 3 };
+
+  $: filteredDefs = (() => {
+    let defs = ZWERG_DEFS;
+
+    // Filter
+    if (filter === 'roles') defs = defs.filter(z => z.grow_role);
+    else if (filter === 'owned') defs = defs.filter(z => state.owned.some(o => o.id === z.id));
+    else if (filter !== 'all') defs = defs.filter(z => z.rarity === filter);
+
+    // Sort
+    const arr = [...defs];
+    if (sort === 'name') {
+      arr.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sort === 'rarity') {
+      arr.sort((a, b) => RARITY_ORDER[b.rarity] - RARITY_ORDER[a.rarity] || a.id - b.id);
+    } else if (sort === 'level') {
+      arr.sort((a, b) => {
+        const la = state.owned.find(o => o.id === a.id)?.level ?? 0;
+        const lb = state.owned.find(o => o.id === b.id)?.level ?? 0;
+        return lb - la || RARITY_ORDER[b.rarity] - RARITY_ORDER[a.rarity];
+      });
+    } else {
+      // Default: Besitzt zuerst, dann nach ID
+      arr.sort((a, b) => {
+        const oa = state.owned.some(o => o.id === a.id) ? 1 : 0;
+        const ob = state.owned.some(o => o.id === b.id) ? 1 : 0;
+        return ob - oa || a.id - b.id;
+      });
+    }
+    return arr;
+  })();
 
   // Karten-Detail
   let selectedZwerg: ZwergDef | null = null;
@@ -160,6 +190,11 @@
                    {filter === 'all' ? 'bg-grow-primary text-grow-dark font-bold' : 'bg-grow-surface text-grow-muted'}">
       Alle ({ZWERG_DEFS.length})
     </button>
+    <button on:click={() => filter = 'owned'}
+            class="px-3 py-1 rounded-full text-[10px] whitespace-nowrap transition-colors
+                   {filter === 'owned' ? 'bg-grow-primary text-grow-dark font-bold' : 'bg-grow-surface text-grow-muted'}">
+      Besitzt ({state.owned.length})
+    </button>
     <button on:click={() => filter = 'roles'}
             class="px-3 py-1 rounded-full text-[10px] whitespace-nowrap transition-colors
                    {filter === 'roles' ? 'bg-grow-primary text-grow-dark font-bold' : 'bg-grow-surface text-grow-muted'}">
@@ -171,6 +206,23 @@
               class="px-3 py-1 rounded-full text-[10px] whitespace-nowrap transition-colors
                      {filter === r ? 'bg-grow-primary text-grow-dark font-bold' : 'bg-grow-surface text-grow-muted'}">
         {RARITY_LABELS[r]} ({count})
+      </button>
+    {/each}
+  </div>
+
+  <!-- Sortierung -->
+  <div class="flex gap-1 items-center">
+    <span class="text-[9px] text-grow-muted mr-1">Sortierung:</span>
+    {#each [
+      { key: 'default', label: 'Standard' },
+      { key: 'name', label: 'A–Z' },
+      { key: 'rarity', label: 'Seltenheit' },
+      { key: 'level', label: 'Level' },
+    ] as s}
+      <button on:click={() => sort = s.key}
+              class="px-2 py-0.5 rounded text-[9px] whitespace-nowrap transition-colors
+                     {sort === s.key ? 'bg-grow-accent/20 text-grow-accent font-bold border border-grow-accent/30' : 'bg-grow-surface/50 text-grow-muted'}">
+        {s.label}
       </button>
     {/each}
   </div>

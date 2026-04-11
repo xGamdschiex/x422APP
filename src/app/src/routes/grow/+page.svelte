@@ -2,9 +2,9 @@
   import { gameStore, getGrowProgress, getGrowTimeLeft } from '$lib/stores/growgame';
   import type { GrowSpace, ActiveGrow } from '$lib/stores/growgame';
   import { zwergeStore, getZwerg, getZwergeByRole, RARITY_COLORS } from '$lib/stores/zwerge';
-  import { getSpaceDef, ROLE_LABELS, getEquip } from '$lib/data/equipment';
+  import { getSpaceDef, ROLE_LABELS, getEquip, getEquipForSpace } from '$lib/data/equipment';
   import type { SpaceType, ZwergRole } from '$lib/data/equipment';
-  import { getStrain, PHASE_LABELS } from '$lib/data/strains';
+  import { getStrain, PHASE_LABELS, getTotalGrowHours } from '$lib/data/strains';
   import type { GrowPhase } from '$lib/data/strains';
   import PixelZwerg from '$lib/components/PixelZwerg.svelte';
   import GrowRoom from '$lib/components/GrowRoom.svelte';
@@ -86,9 +86,11 @@
     gameStore.installEquip(selectedSpaceId, equipId);
   }
 
+  $: compatibleEquip = selectedSpace ? getEquipForSpace(selectedSpace.type).map(d => d.id) : [];
   $: ownedEquipNotInstalled = (game?.equipment ?? []).filter((e: { equip_id: string; broken: boolean }) => {
     if (!selectedSpace) return false;
-    return !selectedSpace.installed_equip.includes(e.equip_id);
+    if (selectedSpace.installed_equip.includes(e.equip_id)) return false;
+    return compatibleEquip.includes(e.equip_id);
   });
 
   // Zwerg fuer Rolle finden
@@ -302,7 +304,7 @@
                 <div class="text-[10px] text-grow-muted space-y-0.5">
                   <p>Typ: {strain.type === 'auto' ? 'Automatic' : 'Photoperiodisch'}</p>
                   <p>Ertrag: {strain.yield_min}g – {strain.yield_max}g pro Pflanze</p>
-                  <p>Dauer: {strain.type === 'auto' ? '10' : '14'} Tage</p>
+                  <p>Dauer: {Math.round(getTotalGrowHours(strain.type) / 24)} Tage</p>
                 </div>
               {/if}
             {/if}
@@ -329,7 +331,7 @@
 {#if showDwarfPicker && pickingRole}
   <div class="fixed inset-0 z-50 bg-black/80 flex items-end justify-center p-4"
        on:click|self={() => showDwarfPicker = false}
-       on:keydown={e => e.key === 'Escape' && (showDwarfPicker = false)} role="dialog">
+       on:keydown={e => e.key === 'Escape' && (showDwarfPicker = false)} role="dialog" tabindex="-1">
     <div class="w-full max-w-sm card mb-20 max-h-[60vh] overflow-y-auto">
       <h3 class="font-pixel text-xs text-grow-primary mb-3">{ROLE_LABELS[pickingRole]} waehlen</h3>
       {#if getOwnedZwergeForRole(pickingRole).length === 0}

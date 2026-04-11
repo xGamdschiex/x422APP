@@ -188,7 +188,7 @@ function tickGrow(grow: ActiveGrow, space: GrowSpace, equipment: OwnedEquip[], n
   if (harvested) {
     // Ertrag berechnen
     const yieldMult = spaceYieldMult(space, equipment);
-    // Zwerg-Qualitaet beeinflusst Ertrag (0.5-1.0 basierend auf Anzahl besetzter Rollen)
+    // Zwerg-Qualitaet beeinflusst Ertrag (0.3-1.0 basierend auf Anzahl besetzter Rollen)
     const spaceDef = getSpaceDef(space.type);
     const filledRoles = space.assigned_dwarves.length;
     const requiredRoles = spaceDef.required_roles.length;
@@ -338,13 +338,15 @@ function createGameStore() {
         if (!giveFreeSeed) return { ...s, last_daily_check: today };
 
         const inv = [...s.seed_inventory];
-        const ww = inv.find(si => si.strain_id === 'ww-auto');
-        if (ww) {
-          ww.count++;
+        const commonPool = STRAIN_DEFS.filter(sd => sd.rarity === 'common');
+        const pick = commonPool[Math.floor(Math.random() * commonPool.length)];
+        const existing = inv.find(si => si.strain_id === pick.id);
+        if (existing) {
+          existing.count++;
         } else {
-          inv.push({ strain_id: 'ww-auto', count: 1 });
+          inv.push({ strain_id: pick.id, count: 1 });
         }
-        toastStore.show(0, '+1 White Widow Auto Seed');
+        toastStore.show(0, `+1 ${pick.name} Seed (Daily)`);
         return { ...s, seed_inventory: inv, last_daily_check: today };
       });
     },
@@ -427,12 +429,15 @@ function createGameStore() {
     installEquip(spaceId: string, equipId: string) {
       doUpdate(s => {
         if (!s.equipment.some(e => e.equip_id === equipId)) return s;
+        const spaceOrder: SpaceType[] = ['fensterbank', 'kleine_box', 'grosse_box', 'kleiner_raum'];
         const spaces = s.spaces.map(sp => {
           if (sp.id !== spaceId) return sp;
           if (sp.installed_equip.includes(equipId)) return sp;
-          // Nur 1 pro Kategorie
           const def = getEquip(equipId);
           if (!def) return sp;
+          // Min-Space pruefen (kein grosse_box Equipment in fensterbank etc.)
+          if (spaceOrder.indexOf(def.min_space) > spaceOrder.indexOf(sp.type)) return sp;
+          // Nur 1 pro Kategorie
           const filtered = sp.installed_equip.filter(eid => {
             const eDef = getEquip(eid);
             return eDef?.category !== def.category;
@@ -644,7 +649,8 @@ export const activeGrows = derived(gameStore, $s => $s.grows);
 export const totalBuds = derived(gameStore, $s => $s.buds);
 export const totalWax = derived(gameStore, $s => $s.wax);
 
-/** Grow-Fortschritt als Prozent (0-100). Mit spaces/equipment wird Speed-Mult beruecksichtigt. */
+/** Grow-Fortschritt als Prozent (0-100). Mit spaces/equipment wird Speed-Mult beruecksichtigt.
+ *  Bei live_extraction wird Curing aus dem Total ausgeschlossen (Harvest erfolgt davor). */
 export function getGrowProgress(grow: ActiveGrow, spaces?: GrowSpace[], equipment?: OwnedEquip[]): number {
   const strain = getStrain(grow.strain_id);
   if (!strain) return 0;
@@ -654,12 +660,14 @@ export function getGrowProgress(grow: ActiveGrow, spaces?: GrowSpace[], equipmen
     if (space) speedMult = spaceSpeedMult(space, equipment);
   }
   const phases = getPhasesForType(strain.type);
-  const totalMs = phases.reduce((s, p) => s + (p.hours / speedMult) * 3600000, 0);
+  const effectivePhases = grow.live_extraction ? phases.filter(p => p.phase !== 'curing') : phases;
+  const totalMs = effectivePhases.reduce((s, p) => s + (p.hours / speedMult) * 3600000, 0);
   const elapsed = Date.now() - grow.started_at;
   return Math.min(100, Math.round((elapsed / totalMs) * 100));
 }
 
-/** Verbleibende Zeit eines Grows als lesbarer String. Mit spaces/equipment wird Speed-Mult beruecksichtigt. */
+/** Verbleibende Zeit eines Grows als lesbarer String. Mit spaces/equipment wird Speed-Mult beruecksichtigt.
+ *  Bei live_extraction wird Curing aus dem Total ausgeschlossen. */
 export function getGrowTimeLeft(grow: ActiveGrow, spaces?: GrowSpace[], equipment?: OwnedEquip[]): string {
   const strain = getStrain(grow.strain_id);
   if (!strain) return '?';
@@ -669,7 +677,8 @@ export function getGrowTimeLeft(grow: ActiveGrow, spaces?: GrowSpace[], equipmen
     if (space) speedMult = spaceSpeedMult(space, equipment);
   }
   const phases = getPhasesForType(strain.type);
-  const totalMs = phases.reduce((s, p) => s + (p.hours / speedMult) * 3600000, 0);
+  const effectivePhases = grow.live_extraction ? phases.filter(p => p.phase !== 'curing') : phases;
+  const totalMs = effectivePhases.reduce((s, p) => s + (p.hours / speedMult) * 3600000, 0);
   const elapsed = Date.now() - grow.started_at;
   const remaining = Math.max(0, totalMs - elapsed);
   const hours = Math.floor(remaining / 3600000);

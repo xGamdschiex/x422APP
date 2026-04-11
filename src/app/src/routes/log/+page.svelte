@@ -17,6 +17,11 @@
   $: queueCount = $queueCountStore;
   $: syncing = $syncingStore;
 
+  function parseDosis(json: string | undefined): { name: string; menge: string }[] {
+    if (!json) return [];
+    try { return JSON.parse(json); } catch { return []; }
+  }
+
   let istEc = '';
   let istPh = '';
   let notiz = '';
@@ -255,7 +260,7 @@
               </div>
             </div>
             {#if entry.dosierungen_json}
-              {@const dosis = JSON.parse(entry.dosierungen_json)}
+              {@const dosis = parseDosis(entry.dosierungen_json)}
               <div class="flex flex-wrap gap-1 mt-1">
                 {#each dosis as d}
                   <span class="text-[9px] px-1 py-0.5 rounded bg-grow-primary/10 text-grow-muted">{d.name}: {d.menge}</span>

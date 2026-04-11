@@ -50,9 +50,8 @@
 
   function canAffordZwergPack(tier: PackTier): boolean {
     if (tier === 'daily') return zwerg.last_daily_claim !== new Date().toISOString().slice(0, 10);
-    const pack = PACK_DEFS.find(p => p.tier === tier);
-    if (!pack) return false;
-    return game.buds >= pack.cost;
+    const effectiveCost = zwergeStore.getEffectiveCost(zwerg, tier);
+    return game.buds >= effectiveCost;
   }
 
   // Zwerg-Packs kosten Buds — openPack mit paidExternally=true
@@ -282,7 +281,11 @@
               {affordable ? 'GRATIS' : 'Morgen wieder'}
             </p>
           {:else}
-            <p class="text-[10px] mt-1 text-green-400">{pack.cost} Buds</p>
+            {@const effectiveCost = zwergeStore.getEffectiveCost(zwerg, pack.tier)}
+            <p class="text-[10px] mt-1 text-green-400">
+              {effectiveCost} Buds
+              {#if effectiveCost < pack.cost}<span class="line-through text-grow-muted ml-1">{pack.cost}</span>{/if}
+            </p>
           {/if}
         </button>
       {/each}
@@ -308,7 +311,7 @@
 {#if showSeedResult}
   <div class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
        on:click|self={() => showSeedResult = false}
-       on:keydown={e => e.key === 'Escape' && (showSeedResult = false)} role="dialog">
+       on:keydown={e => e.key === 'Escape' && (showSeedResult = false)} role="dialog" tabindex="-1">
     <div class="w-full max-w-sm card">
       <h3 class="font-pixel text-xs text-grow-primary text-center mb-3">Neue Seeds!</h3>
       <div class="space-y-2">

@@ -266,7 +266,7 @@
 <!-- Pack-Oeffnungs-Modal -->
 {#if packOpening}
   <div class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
-       on:click|self={closePack} on:keydown={e => e.key === 'Escape' && closePack()} role="dialog">
+       on:click|self={closePack} on:keydown={e => e.key === 'Escape' && closePack()} role="dialog" tabindex="-1">
     <div class="w-full max-w-sm">
       {#if !packRevealed}
         <button on:click={revealPack}
@@ -314,7 +314,7 @@
 {#if selectedZwerg}
   <div class="fixed inset-0 z-50 bg-black/80 flex items-end justify-center p-4"
        on:click|self={() => selectedZwerg = null}
-       on:keydown={e => e.key === 'Escape' && (selectedZwerg = null)} role="dialog">
+       on:keydown={e => e.key === 'Escape' && (selectedZwerg = null)} role="dialog" tabindex="-1">
     <div class="w-full max-w-sm card border {RARITY_BG[selectedZwerg.rarity]} mb-20">
       <div class="text-center">
         <div class="flex justify-center mb-3"><PixelZwerg id={selectedZwerg.id} size={64} animate={true} /></div>

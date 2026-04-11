@@ -403,6 +403,7 @@
     justify-content: center;
   }
   .plant-pos :global(.lp-plant-wrap) { width: 100%; filter: none; }
+  .plant-pos :global(.plant-wrap) { width: 100%; filter: none; }
   .plant-pos :global(svg) { width: 100% !important; height: auto !important; }
 
   /* Arbeitende Zwerge */
